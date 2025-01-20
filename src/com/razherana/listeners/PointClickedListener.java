@@ -2,9 +2,6 @@ package listeners;
 
 import game.elements.Point;
 import java.awt.geom.Point2D;
-
-import javax.swing.JOptionPane;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import game.Game;
@@ -27,18 +24,14 @@ public class PointClickedListener extends MouseAdapter {
 
     if (clicked != null) {
       game.getCurrentPlayer().addPoint(clicked);
-      game.nextTurn();
       game.getPanel().repaint();
+      game.updateWinner();
+      game.nextTurn();
     }
 
-    // Check winner
-    for (Player player : game.getPlayers())
-      if (player.checkWin()) {
-        System.out.println(player.getName() + " wins!");
-        JOptionPane.showMessageDialog(game.getFrame(), player.getName() + " wins!");
-        game.reset();
-        break;
-      }
+    for (Player player : game.getPlayers()) {
+      System.out.println(player.getName() + " : " + player.getPoints().size());
+    }
   }
 
 }

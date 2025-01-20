@@ -5,10 +5,26 @@ import java.util.ArrayList;
 
 import game.elements.HelpPoint;
 import game.elements.Point;
+import game.elements.WinLine;
 
 public class Player {
   private String name;
+  private int score = 0;
   private ArrayList<Point> points = new ArrayList<>();
+  private ArrayList<WinLine> winLines = new ArrayList<>();
+
+  public int getScore() { return score; }
+
+  public void setScore(int score) { this.score = score; }
+
+  public void incrementScore() { score++; }
+
+  private ArrayList<Point> usablePoints = new ArrayList<>();
+
+  public ArrayList<Point> getUsablePoints() { return usablePoints; }
+
+  public void setUsablePoints(ArrayList<Point> usablePoints) { this.usablePoints = usablePoints; }
+
   private Game game;
   private Color color;
 
@@ -36,27 +52,74 @@ public class Player {
 
   public void addPoint(Point point) {
     point.setPlayer(this);
-    points.add(point);
+    getPoints().add(point);
+    getUsablePoints().add(point);
     game.getClickablePoints().removeIf(p -> p.getX() == point.getX() && p.getY() == point.getY());
   }
 
-  public boolean checkWin() {
-    return getAttackHelpPoint(Game.COUNT_WIN) != null;
+  public ArrayList<Point> checkWin() { return getContinuousPoints(Game.COUNT_WIN); }
+
+  public void reset() {
+    points.clear();
+    usablePoints.clear();
+    winLines.clear();
+    score = 0;
   }
 
-  public void reset() { points.clear(); }
-
   private HelpPoint getInstantWin() { return getAttackHelpPoint(Game.COUNT_WIN - 1); }
+
+  private ArrayList<Point> getContinuousPoints(int countNeeded) {
+    if (game.getClickablePoints().isEmpty())
+      return null;
+
+    if (getUsablePoints().size() < countNeeded)
+      return null;
+
+    for (Point point : new ArrayList<>(getUsablePoints())) {
+      int x = point.getGameX();
+      int y = point.getGameY();
+
+      final int[][] checks = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 } };
+
+      // Check all directions
+      for (int check = 0, count = 1; check < checks.length; check++) {
+        ArrayList<Point> resultPoints = new ArrayList<>();
+        resultPoints.add(point);
+        count = 1;
+        for (int i = 1; i < countNeeded; i++) {
+          final int checkIndex = check, index = i;
+          if (points.stream().anyMatch(p -> p.getGameX() == x + checks[checkIndex][0] * index
+              && p.getGameY() == y + checks[checkIndex][1] * index)) {
+            resultPoints.add(new Point(this, x + checks[checkIndex][0] * index, y + checks[checkIndex][1] * index));
+            count++;
+          } else {
+            resultPoints.clear();
+            break;
+          }
+        }
+
+        final int checkIndex = check;
+
+        if (count == countNeeded && getGame().getClickablePoints().stream()
+            .anyMatch((e) -> e.getGameX() == x + checks[checkIndex][0] * countNeeded
+                && e.getGameY() == y + checks[checkIndex][1] * countNeeded)) {
+          return resultPoints;
+        }
+      }
+    }
+
+    return null;
+  }
 
   private HelpPoint getAttackHelpPoint(int countNeeded) {
     if (game.getClickablePoints().isEmpty())
       return null;
 
-    if (points.size() < countNeeded)
+    if (getUsablePoints().size() < countNeeded)
       return null;
 
     System.out.println("Check point start");
-    for (Point point : new ArrayList<>(points)) {
+    for (Point point : new ArrayList<>(getUsablePoints())) {
       System.out.println();
       int x = point.getGameX();
       int y = point.getGameY();
@@ -129,7 +192,7 @@ public class Player {
       throw new CountPointsException();
 
     // Check if we miss points to get help
-    if (points.size() < Game.COUNT_WIN - 2)
+    if (getUsablePoints().size() < Game.COUNT_WIN - 2)
       throw new NoHelpPointException();
 
     // Check for instant win
@@ -177,5 +240,9 @@ public class Player {
       return false;
     return true;
   }
+
+  public ArrayList<WinLine> getWinLines() { return winLines; }
+
+  public void setWinLines(ArrayList<WinLine> winLines) { this.winLines = winLines; }
 
 }

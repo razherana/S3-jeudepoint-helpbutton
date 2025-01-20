@@ -38,4 +38,37 @@ public class Point extends Ellipse2D.Double {
   public int getGameX() { return gameX; }
 
   public void setGameX(int gameX) { this.gameX = gameX; }
+
+  @Override
+  public String toString() {
+    return "Point [player=" + (player == null ? "Clickable" : player.getName()) + ", gameX=" + gameX + ", gameY=" + gameY
+        + "]";
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + gameX;
+    result = prime * result + gameY;
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!super.equals(obj))
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Point other = (Point) obj;
+    if (gameX != other.gameX)
+      return false;
+    if (gameY != other.gameY)
+      return false;
+    return true;
+  }
+
+  
 }

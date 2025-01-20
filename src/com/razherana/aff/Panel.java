@@ -1,5 +1,6 @@
 package aff;
 
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -10,6 +11,7 @@ import game.Player;
 
 public class Panel extends JPanel implements Runnable {
   private Game game;
+  private Font font = new Font("arial", Font.BOLD, 18);
 
   public Game getGame() { return game; }
 
@@ -49,7 +51,24 @@ public class Panel extends JPanel implements Runnable {
 
     drawHelpPoint((Graphics2D) g.create());
 
+    drawScore((Graphics2D) g.create());
+
+    drawWinLines((Graphics2D) g.create());
+
     g.dispose();
+  }
+
+  private void drawWinLines(Graphics2D graphics2d) {
+    getGame().getPlayers().forEach((e) -> e.getWinLines().forEach(l -> l.draw(graphics2d)));
+    graphics2d.dispose();
+  }
+
+  private void drawScore(Graphics2D graphics2d) {
+    graphics2d.setFont(font);
+    int i = 0;
+    for (Player player : getGame().getPlayers())
+      graphics2d.drawString(player.getName() + " = " + player.getScore(), 20, 20 + 25 * i++);
+    graphics2d.dispose();
   }
 
   private void drawHelpPoint(Graphics2D graphics2d) {

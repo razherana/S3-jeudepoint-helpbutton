@@ -2,11 +2,14 @@ package game;
 
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import aff.Frame;
 import aff.Panel;
 import game.elements.HelpPoint;
 import game.elements.Point;
 import game.elements.Terrain;
+import game.elements.WinLine;
 import listeners.PointClickedListener;
 import listeners.ShowHelpPointListener;
 
@@ -21,27 +24,15 @@ public class Game {
   private Frame frame;
   private Panel panel;
   private HelpPoint helpPoint = null;
+  private boolean oneScoreGame = false;
 
-  public HelpPoint getHelpPoint() { return helpPoint; }
+  private Terrain terrain;
 
-  public void setHelpPoint(HelpPoint helpPoint) { this.helpPoint = helpPoint; }
-
-  private final Terrain terrain;
   private final ArrayList<Point> clickablePoints = new ArrayList<>();
+
   private final PointClickedListener pointClickedListener = new PointClickedListener(this);
+
   private final ShowHelpPointListener showHelpPointListener = new ShowHelpPointListener(this);
-
-  public ShowHelpPointListener getShowHelpPointListener() { return showHelpPointListener; }
-
-  public PointClickedListener getPointClickedListener() { return pointClickedListener; }
-
-  public void reset() {
-    turn = 0;
-    players.forEach(p -> p.reset());
-    clickablePoints.clear();
-    clickablePoints.addAll(terrain.getClickablePoints());
-    panel.repaint();
-  }
 
   public Game() {
     width = 800;
@@ -56,6 +47,28 @@ public class Game {
 
     terrain = new Terrain(16, 12);
     clickablePoints.addAll(terrain.getClickablePoints());
+  }
+
+  public boolean isOneScoreGame() { return oneScoreGame; }
+
+  public void setOneScoreGame(boolean oneScoreGame) { this.oneScoreGame = oneScoreGame; }
+
+  public HelpPoint getHelpPoint() { return helpPoint; }
+
+  public void setHelpPoint(HelpPoint helpPoint) { this.helpPoint = helpPoint; }
+
+  public void setTerrain(Terrain terrain) { this.terrain = terrain; }
+
+  public ShowHelpPointListener getShowHelpPointListener() { return showHelpPointListener; }
+
+  public PointClickedListener getPointClickedListener() { return pointClickedListener; }
+
+  public void reset() {
+    turn = 0;
+    players.forEach(p -> p.reset());
+    clickablePoints.clear();
+    clickablePoints.addAll(terrain.getClickablePoints());
+    panel.repaint();
   }
 
   public int getTurn() { return turn; }
@@ -93,4 +106,33 @@ public class Game {
   public int getWidth() { return width; }
 
   public int getHeight() { return height; }
+
+  public void updateWinner() {
+    for (Player player : getPlayers()) {
+      boolean breakAgain = false;
+      ArrayList<Point> line;
+
+      while ((line = player.checkWin()) != null) {
+        System.out.println(player.getName() + " wins!");
+
+        player.getUsablePoints().removeAll(line);
+        player.incrementScore();
+        player.getWinLines().add(new WinLine(line, player));
+
+        if (isOneScoreGame()) {
+          int choice = JOptionPane.showConfirmDialog(getFrame(), player.getName() + " wins! Wanna continue?",
+              "Game Over", JOptionPane.YES_NO_OPTION);
+          if (choice != JOptionPane.YES_OPTION) {
+            reset();
+            breakAgain = true;
+            break;
+          }
+          setOneScoreGame(false);
+        }
+      }
+
+      if (breakAgain)
+        break;
+    }
+  }
 }

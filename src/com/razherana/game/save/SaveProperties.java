@@ -13,18 +13,21 @@ import java.util.Properties;
 import game.Game;
 import game.Player;
 import game.elements.Point;
+import game.elements.Terrain;
 
 public class SaveProperties {
   private int turn = 0;
   private ArrayList<Player> players = new ArrayList<>();
   private ArrayList<Point> clickables = new ArrayList<>();
   private Properties properties;
+  private Terrain terrain;
 
   public static void save(Game game, File file) {
     SaveProperties s = new SaveProperties();
     s.clickables = game.getClickablePoints();
     s.players = game.getPlayers();
     s.turn = game.getTurn();
+    s.terrain = game.getTerrain();
 
     s.save(file);
   }
@@ -37,12 +40,17 @@ public class SaveProperties {
     game.getClickablePoints().clear();
     game.getClickablePoints().addAll(s.clickables);
     game.setPlayers(s.players);
+    game.setTerrain(s.terrain);
+
+    game.updateWinner();
   }
 
   private void save(File file) {
     properties = new Properties();
 
     properties.setProperty("turn", turn + "");
+
+    properties.setProperty("terrain", terrain.getLengthX() + "," + terrain.getLengthY());
 
     properties.setProperty("players",
         String.join(",", new ArrayList<>(players).stream().map(e -> e.getName()).toList()));
@@ -55,9 +63,6 @@ public class SaveProperties {
           new ArrayList<>(player.getPoints()).stream().map(e -> e.getGameX() + "," + e.getGameY()).toList()));
       playerId++;
     }
-
-    properties.setProperty("clickables",
-        String.join(";", new ArrayList<>(clickables).stream().map(e -> e.getGameX() + "," + e.getGameY()).toList()));
 
     try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
       properties.storeToXML(fileOutputStream, "Save of game : " + LocalDateTime.now());
@@ -77,6 +82,11 @@ public class SaveProperties {
       return;
     }
 
+    int[] lengthsTerrain = Arrays.stream(properties.get("terrain").toString().split(",")).mapToInt(Integer::parseInt)
+        .toArray();
+
+    terrain = new Terrain(lengthsTerrain[0], lengthsTerrain[1]);
+
     turn = Integer.parseInt(properties.get("turn").toString());
 
     players = new ArrayList<>(
@@ -90,12 +100,11 @@ public class SaveProperties {
             Integer[] ints = Arrays.stream(e.split(",")).map(Integer::parseInt).toList().toArray(new Integer[] {});
             return new Point(player, ints[0], ints[1]);
           }).toList()));
+      player.setUsablePoints(new ArrayList<>(player.getPoints()));
       playerId++;
     }
 
-    clickables = new ArrayList<>(Arrays.stream(properties.get("clickables").toString().split(";")).map(e -> {
-      Integer[] ints = Arrays.stream(e.split(",")).map(Integer::parseInt).toList().toArray(new Integer[] {});
-      return new Point(null, ints[0], ints[1]);
-    }).toList());
+    clickables = terrain.getClickablePoints();
+    players.forEach(p -> clickables.removeAll(p.getPoints()));
   }
 }
