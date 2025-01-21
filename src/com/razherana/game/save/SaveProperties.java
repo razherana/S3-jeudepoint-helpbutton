@@ -21,6 +21,7 @@ public class SaveProperties {
   private ArrayList<Point> clickables = new ArrayList<>();
   private Properties properties;
   private Terrain terrain;
+  private boolean oneScoreGame;
 
   public static void save(Game game, File file) {
     SaveProperties s = new SaveProperties();
@@ -28,6 +29,7 @@ public class SaveProperties {
     s.players = game.getPlayers();
     s.turn = game.getTurn();
     s.terrain = game.getTerrain();
+    s.oneScoreGame = game.isOneScoreGame();
 
     s.save(file);
   }
@@ -36,6 +38,7 @@ public class SaveProperties {
     SaveProperties s = new SaveProperties();
     s.load(file, game);
 
+    game.setOneScoreGame(s.oneScoreGame);
     game.setTurn(s.turn);
     game.getClickablePoints().clear();
     game.getClickablePoints().addAll(s.clickables);
@@ -47,6 +50,8 @@ public class SaveProperties {
 
   private void save(File file) {
     properties = new Properties();
+
+    properties.setProperty("oneScoreGame", oneScoreGame + "");
 
     properties.setProperty("turn", turn + "");
 
@@ -84,6 +89,8 @@ public class SaveProperties {
 
     int[] lengthsTerrain = Arrays.stream(properties.get("terrain").toString().split(",")).mapToInt(Integer::parseInt)
         .toArray();
+
+    oneScoreGame = Boolean.parseBoolean(properties.get("oneScoreGame").toString());
 
     terrain = new Terrain(lengthsTerrain[0], lengthsTerrain[1]);
 
