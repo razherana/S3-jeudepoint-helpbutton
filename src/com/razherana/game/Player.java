@@ -253,7 +253,7 @@ public class Player {
     }
 
     // Check for attack
-    HelpPoint attackHelpPoint = getAttackHelpPoint(Game.COUNT_WIN - 3);
+    HelpPoint attackHelpPoint = getSimpleAttack();
     if (attackHelpPoint != null)
       return attackHelpPoint;
 
@@ -298,6 +298,38 @@ public class Player {
     if (res != null)
       return res;
     return getAttackHelpPoint(Game.COUNT_WIN - 2);
+  }
+
+  private HelpPoint getSimpleAttack() {
+    var res = getContinuousPointsHelp(Game.COUNT_WIN - 2, new ArrayList<>(getUsablePoints()), null);
+
+    if (res != null) {
+      var point = res.get(res.size() - 1);
+      var helpPoint = new HelpPoint(point.getGameX(), point.getGameY(), this);
+      return helpPoint;
+    }
+
+    // Three then turn
+    res = getContinuousPoints(Game.COUNT_WIN - 2, new ArrayList<>(getUsablePoints()), null);
+    if (res != null) {
+      var direction = getDirectionOfPoints(res);
+      var crossed = getContinuousPointsHelpFromPoint(direction, res.get(0), 1);
+      if (crossed != null) {
+        var point = crossed.get(crossed.size() - 1);
+        var helpPoint = new HelpPoint(point.getGameX(), point.getGameY(), this);
+        return helpPoint;
+      }
+
+      direction = getDirectionOfPoints(res);
+      crossed = getContinuousPointsHelpFromPoint(direction, res.get(res.size() - 1), 1);
+      if (crossed != null) {
+        var point = crossed.get(crossed.size() - 1);
+        var helpPoint = new HelpPoint(point.getGameX(), point.getGameY(), this);
+        return helpPoint;
+      }
+    }
+
+    return null;
   }
 
   private ArrayList<Point> getContinuousPoints(int countNeeded, ArrayList<Point> points,
@@ -346,6 +378,62 @@ public class Player {
             listUsed.add(Map.entry(point, List.of(checks[check][0], checks[check][1])));
           }
           return resultPoints;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private ArrayList<Point> getContinuousPointsHelp(int countNeeded, ArrayList<Point> points,
+      HashSet<Entry<Point, List<Integer>>> listUsed) {
+    if (game.getClickablePoints().isEmpty())
+      return null;
+
+    if (points.size() < countNeeded)
+      return null;
+
+    for (Point point : points) {
+      int x = point.getGameX();
+      int y = point.getGameY();
+
+      final int[][] checks = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+
+      // Check all directions
+      for (int check = 0, count = 1; check < checks.length; check++) {
+        final int checkFinaled = check;
+        if (listUsed != null
+            && listUsed.stream()
+                .anyMatch((e) -> e.getKey().equals(point) && e.getValue().get(0) == checks[checkFinaled][0]
+                    && e.getValue().get(1) == checks[checkFinaled][1]))
+          continue;
+
+        ArrayList<Point> resultPoints = new ArrayList<>();
+        resultPoints.add(point);
+        count = 1;
+        for (int i = 1; i < countNeeded; i++) {
+          final int checkIndex = check, index = i;
+          if (points.stream().anyMatch(p -> p.getGameX() == x + checks[checkIndex][0] * index
+              && p.getGameY() == y + checks[checkIndex][1] * index)) {
+            resultPoints.add(new Point(this, x + checks[checkIndex][0] * index, y + checks[checkIndex][1] * index));
+            count++;
+          } else {
+            resultPoints.clear();
+            if (listUsed != null)
+              listUsed.add(Map.entry(point, List.of(checks[check][0], checks[check][1])));
+            break;
+          }
+        }
+
+        if (count == countNeeded) {
+          if (listUsed != null)
+            listUsed.add(Map.entry(point, List.of(checks[check][0], checks[check][1])));
+
+          Point point2 = new Point(this, x + checks[check][0] * count, y + checks[check][1] * count);
+          if (getGame().getClickablePoints().contains(point2)) {
+            resultPoints.add(point2);
+            return resultPoints;
+          }
         }
       }
     }
