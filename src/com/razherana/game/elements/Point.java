@@ -70,5 +70,7 @@ public class Point extends Ellipse2D.Double {
     return true;
   }
 
-  
+  public double getEuclidianDistance() {
+    return Math.pow(getGameX(), 2.0) + Math.pow(getGameY(), 2.0);
+  }
 }

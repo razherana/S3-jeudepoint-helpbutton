@@ -7,6 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
 import game.Game;
 import game.save.SaveProperties;
@@ -65,6 +66,24 @@ public class Frame extends javax.swing.JFrame {
     menu.add(exit);
 
     menubar.add(menu);
+
+    JMenu gameMenu = new JMenu("Game");
+
+    JMenuItem help = new JMenuItem("Help");
+    help.addActionListener((e) -> game.getShowHelpPointListener().showHelp());
+
+    JMenuItem reset = new JMenuItem("Reset");
+    reset.addActionListener((e) -> {
+      if (JOptionPane.showConfirmDialog(Frame.this, "Are you sure you wanna reset ?", "Confirm",
+          JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        game.reset();
+      }
+    });
+
+    gameMenu.add(help);
+    gameMenu.add(reset);
+
+    menubar.add(gameMenu);
 
     add(menubar, BorderLayout.NORTH);
   }

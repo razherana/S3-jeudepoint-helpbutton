@@ -38,9 +38,17 @@ public class Game {
     width = 800;
     height = 600;
 
+    // int limit = Integer.parseInt(JOptionPane.showInputDialog("Write limit
+    // please"));
+
     // Test players
     addPlayer(new Player(this, "Player 1", java.awt.Color.RED));
     addPlayer(new Player(this, "Player 2", java.awt.Color.GREEN));
+
+    for (Player player : getPlayers()) {
+      player.setHasLimit(false);
+      // player.setLimit(limit);
+    }
 
     panel = new Panel(this);
     frame = new Frame(this);
@@ -49,19 +57,33 @@ public class Game {
     clickablePoints.addAll(terrain.getClickablePoints());
   }
 
-  public boolean isOneScoreGame() { return oneScoreGame; }
+  public boolean isOneScoreGame() {
+    return oneScoreGame;
+  }
 
-  public void setOneScoreGame(boolean oneScoreGame) { this.oneScoreGame = oneScoreGame; }
+  public void setOneScoreGame(boolean oneScoreGame) {
+    this.oneScoreGame = oneScoreGame;
+  }
 
-  public HelpPoint getHelpPoint() { return helpPoint; }
+  public HelpPoint getHelpPoint() {
+    return helpPoint;
+  }
 
-  public void setHelpPoint(HelpPoint helpPoint) { this.helpPoint = helpPoint; }
+  public void setHelpPoint(HelpPoint helpPoint) {
+    this.helpPoint = helpPoint;
+  }
 
-  public void setTerrain(Terrain terrain) { this.terrain = terrain; }
+  public void setTerrain(Terrain terrain) {
+    this.terrain = terrain;
+  }
 
-  public ShowHelpPointListener getShowHelpPointListener() { return showHelpPointListener; }
+  public ShowHelpPointListener getShowHelpPointListener() {
+    return showHelpPointListener;
+  }
 
-  public PointClickedListener getPointClickedListener() { return pointClickedListener; }
+  public PointClickedListener getPointClickedListener() {
+    return pointClickedListener;
+  }
 
   public void reset() {
     turn = 0;
@@ -71,15 +93,25 @@ public class Game {
     panel.repaint();
   }
 
-  public int getTurn() { return turn; }
+  public int getTurn() {
+    return turn;
+  }
 
-  public void setTurn(int turn) { this.turn = turn; }
+  public void setTurn(int turn) {
+    this.turn = turn;
+  }
 
-  public ArrayList<Player> getPlayers() { return players; }
+  public ArrayList<Player> getPlayers() {
+    return players;
+  }
 
-  public void setPlayers(ArrayList<Player> players) { this.players = players; }
+  public void setPlayers(ArrayList<Player> players) {
+    this.players = players;
+  }
 
-  public void addPlayer(Player player) { players.add(player); }
+  public void addPlayer(Player player) {
+    players.add(player);
+  }
 
   public void nextTurn() {
     turn = (turn + 1) % players.size();
@@ -87,25 +119,45 @@ public class Game {
     panel.repaint();
   }
 
-  public Player getCurrentPlayer() { return players.get(turn); }
+  public Player getCurrentPlayer() {
+    return players.get(turn);
+  }
 
-  public ArrayList<Point> getClickablePoints() { return clickablePoints; }
+  public ArrayList<Point> getClickablePoints() {
+    return clickablePoints;
+  }
 
-  public Terrain getTerrain() { return terrain; }
+  public Terrain getTerrain() {
+    return terrain;
+  }
 
-  public Frame getFrame() { return frame; }
+  public Frame getFrame() {
+    return frame;
+  }
 
-  public void setFrame(Frame frame) { this.frame = frame; }
+  public void setFrame(Frame frame) {
+    this.frame = frame;
+  }
 
-  public Panel getPanel() { return panel; }
+  public Panel getPanel() {
+    return panel;
+  }
 
-  public void setPanel(Panel panel) { this.panel = panel; }
+  public void setPanel(Panel panel) {
+    this.panel = panel;
+  }
 
-  public void start() { new Thread(panel).start(); }
+  public void start() {
+    new Thread(panel).start();
+  }
 
-  public int getWidth() { return width; }
+  public int getWidth() {
+    return width;
+  }
 
-  public int getHeight() { return height; }
+  public int getHeight() {
+    return height;
+  }
 
   public void updateWinner() {
     for (Player player : getPlayers()) {

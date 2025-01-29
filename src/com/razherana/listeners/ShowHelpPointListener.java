@@ -16,11 +16,7 @@ public class ShowHelpPointListener extends KeyAdapter {
 
   public ShowHelpPointListener(Game game) { this.game = game; }
 
-  @Override
-  public void keyPressed(KeyEvent e) {
-    if (e.getKeyCode() != KeyEvent.VK_H)
-      return;
-
+  public void showHelp() {
     if (game.getHelpPoint() != null)
       return;
 
@@ -43,5 +39,13 @@ public class ShowHelpPointListener extends KeyAdapter {
     }
 
     game.setHelpPoint(helpPoint);
+  }
+
+  @Override
+  public void keyPressed(KeyEvent e) {
+    if (e.getKeyCode() != KeyEvent.VK_H)
+      return;
+
+    showHelp();
   }
 }
